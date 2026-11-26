@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#cfd0e1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Quản lý tài chính</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/finance-app.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/finance-app-180.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <p id="storage-status" class="storage-status" role="status" aria-live="polite" hidden></p>
+      <!-- MÀN 1: LỊCH SỬ / TỔNG QUAN -->
+      <section
+        class="screen active"
+        id="overview-screen"
+        aria-label="Lịch sử tài chính"
+      >
+        <div class="overview-layout">
+          <div class="history-panel">
+            <header class="history-heading">
+              <h1>Lịch sử chi tiêu và thu</h1>
+              <div class="history-tools">
+                <input
+                  id="history-search"
+                  class="history-search"
+                  type="search"
+                  placeholder="Tìm ghi chú hoặc khoản..."
+                  aria-label="Tìm kiếm lịch sử giao dịch"
+                />
+                <div
+                  class="filter-group"
+                  role="group"
+                  aria-label="Lọc loại giao dịch"
+                >
+                  <button
+                    type="button"
+                    class="filter-btn active"
+                    data-filter="all"
+                  >
+                    Tất cả
+                  </button>
+                  <button type="button" class="filter-btn" data-filter="chi">
+                    Chi
+                  </button>
+                  <button type="button" class="filter-btn" data-filter="thu">
+                    Thu
+                  </button>
+                </div>
+              </div>
+              <div class="wallet-summary">
+                <span>Số dư ví hiện tại</span>
+                <strong id="current-wallet-balance">0 ₫</strong>
+              </div>
+            </header>
+            <div id="history-list" class="history-list"></div>
+          </div>
+
+          <div class="overview-bottom">
+            <div
+              class="fund-scroll"
+              id="fund-scroll"
+              tabindex="0"
+              aria-label="Danh sách tiến độ các quỹ"
+            >
+              <div class="fund-list" id="fund-summary"></div>
+            </div>
+
+            <aside class="chart-panel" aria-label="Biểu đồ tỉ trọng">
+              <div class="chart-top">
+                <h2>Tỉ trọng</h2>
+                <div
+                  class="chart-switch"
+                  role="group"
+                  aria-label="Chế độ biểu đồ"
+                >
+                  <button
+                    type="button"
+                    class="chart-mode-btn active"
+                    data-chart-mode="chi"
+                  >
+                    Chi
+                  </button>
+                  <button
+                    type="button"
+                    class="chart-mode-btn"
+                    data-chart-mode="thu"
+                  >
+                    Thu
+                  </button>
+                </div>
+              </div>
+              <div class="chart-body">
+                <div id="overview-donut" class="donut-ring">
+                  <div class="donut-center">
+                    <span id="donut-caption">Tổng chi</span>
+                    <strong id="donut-total">0 ₫</strong>
+                  </div>
+                </div>
+                <ul id="overview-legend" class="donut-legend"></ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <aside class="notes-panel" aria-label="Ghi chú nhanh">
+          <header class="notes-header">
+            <h2>Ghi chú</h2>
+            <span id="notes-count" class="notes-count">0</span>
+          </header>
+
+          <form id="note-form" class="note-quick-form">
+            <input
+              id="quick-note-input"
+              class="quick-note-input"
+              type="text"
+              placeholder="Viết ghi chú..."
+              aria-label="Nội dung ghi chú"
+              required
+            />
+            <button
+              type="submit"
+              class="quick-note-add"
+              aria-label="Thêm ghi chú"
+            >
+              +
+            </button>
+          </form>
+
+          <div id="quick-notes-list" class="quick-notes-list"></div>
+        </aside>
+
+        <aside class="nav-rail" aria-label="Điều hướng">
+          <button
+            class="nav-item"
+            type="button"
+            data-screen="funds"
+            aria-label="Quỹ"
+          >
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M15 47l9-26 15 8 8-14 8 27-19-8-11 13z" />
+              <circle cx="32" cy="13" r="8" />
+              <path d="M25 35l17 8M29 30l17 8" />
+            </svg>
+            <span class="nav-label">Quỹ</span>
+          </button>
+          <button
+            class="nav-item"
+            type="button"
+            data-screen="entry"
+            aria-label="Home"
+          >
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M10 32l22-20 22 20M16 29v25h32V29" />
+              <path d="M27 54V39h10v15" />
+            </svg>
+            <span class="nav-label">Home</span>
+          </button>
+          <button
+            class="nav-item active"
+            type="button"
+            data-screen="overview"
+            aria-label="Lịch sử"
+          >
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M8 54h48M13 54V35h10v19M28 54V23h10v31M43 54V12h10v42" />
+            </svg>
+            <span class="nav-label">Lịch sử</span>
+          </button>
+        </aside>
+      </section>
+
+      <!-- MÀN 2: QUỸ -->
+      <section class="screen" id="funds-screen" aria-label="Quản lý quỹ">
+        <div class="funds-content">
+          <section class="main-pool-card" aria-labelledby="main-pool-title">
+            <div class="main-pool-head">
+              <h2 id="main-pool-title">Quỹ chính</h2>
+              <div class="io-actions">
+                <button type="button" id="export-json" class="io-btn">
+                  Xuất JSON
+                </button>
+                <label class="io-btn">
+                  Nhập JSON
+                  <input
+                    type="file"
+                    id="import-json"
+                    accept="application/json"
+                    hidden
+                  />
+                </label>
+              </div>
+            </div>
+            <div class="pool-input-grid">
+              <label class="pool-field" for="current-period-income">
+                Thu nhập chính kỳ này
+                <span class="main-pool-input-wrap">
+                  <input
+                    id="current-period-income"
+                    type="number"
+                    min="0"
+                    step="1"
+                    inputmode="numeric"
+                    value="0"
+                  />
+                  <span>₫</span>
+                </span>
+              </label>
+              <button
+                id="transfer-income"
+                class="transfer-income"
+                type="button"
+                aria-label="Chuyển thu nhập kỳ này vào tổng quỹ"
+                title="Chuyển thu nhập vào tổng quỹ"
+              >
+                <span aria-hidden="true">→</span>
+              </button>
+              <div class="pool-field total-pool-field">
+                <span>Tổng quỹ</span>
+                <div class="total-pool-row">
+                  <span class="main-pool-input-wrap">
+                    <output id="total-fund-amount">0 ₫</output>
+                  </span>
+                  <button
+                    id="refresh-period"
+                    class="refresh-period"
+                    type="button"
+                    aria-label="Làm mới kỳ và chuyển số dư sang kỳ tiếp theo"
+                    title="Làm mới kỳ"
+                  >
+                    <span aria-hidden="true">↻</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <p id="main-pool-help">
+              Nhập thu nhập kỳ này rồi nhấn mũi tên để cộng vào tổng quỹ. Hạn
+              mức chi đã cấp sẽ không tự tăng khi có thu nhập mới.
+            </p>
+            <p
+              id="allocation-capacity"
+              class="allocation-capacity"
+              aria-live="polite"
+            ></p>
+          </section>
+
+          <div class="allocation-columns">
+            <section
+              class="allocation-column"
+              aria-labelledby="expense-allocations-title"
+            >
+              <header class="allocation-column-header">
+                <h2 id="expense-allocations-title">Các khoản chi</h2>
+                <button
+                  id="add-expense-allocation"
+                  class="add-allocation"
+                  type="button"
+                  aria-label="Thêm khoản chi"
+                >
+                  +
+                </button>
+              </header>
+              <div id="expense-allocations" class="allocation-list"></div>
+            </section>
+
+            <section
+              class="allocation-column"
+              aria-labelledby="income-allocations-title"
+            >
+              <header class="allocation-column-header">
+                <h2 id="income-allocations-title">Các khoản thu</h2>
+                <button
+                  id="add-income-allocation"
+                  class="add-allocation"
+                  type="button"
+                  aria-label="Thêm khoản thu"
+                >
+                  +
+                </button>
+              </header>
+              <div id="income-allocations" class="allocation-list"></div>
+            </section>
+          </div>
+          <p
+            id="allocation-feedback"
+            class="allocation-feedback"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </div>
+
+        <aside class="nav-rail" aria-label="Điều hướng">
+          <button
+            class="nav-item active"
+            type="button"
+            data-screen="funds"
+            aria-label="Quỹ"
+          >
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M15 47l9-26 15 8 8-14 8 27-19-8-11 13z" />
+              <circle cx="32" cy="13" r="8" />
+              <path d="M25 35l17 8M29 30l17 8" />
+            </svg>
+            <span class="nav-label">Quỹ</span>
+          </button>
+          <button
+            class="nav-item"
+            type="button"
+            data-screen="entry"
+            aria-label="Home"
+          >
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M10 32l22-20 22 20M16 29v25h32V29" />
+              <path d="M27 54V39h10v15" />
+            </svg>
+            <span class="nav-label">Home</span>
+          </button>
+          <button
+            class="nav-item"
+            type="button"
+            data-screen="overview"
+            aria-label="Lịch sử"
+          >
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M8 54h48M13 54V35h10v19M28 54V23h10v31M43 54V12h10v42" />
+            </svg>
+            <span class="nav-label">Lịch sử</span>
+          </button>
+        </aside>
+      </section>
+
+      <!-- MÀN 3: HOME / NHẬP GIAO DỊCH -->
+      <section class="screen" id="entry-screen" aria-label="Nhập giao dịch">
+        <form id="transaction-form" class="entry-content">
+          <div class="amount-calc-wrap">
+            <label class="sr-only" for="transaction-amount"
+              >Số tiền hoặc phép tính giao dịch</label
+            >
+            <input
+              id="transaction-amount"
+              class="title-input"
+              type="text"
+              inputmode="numeric"
+              placeholder="0"
+              required
+            />
+            <div class="calc-pad" aria-label="Bàn phím tính nhanh">
+              <button type="button" class="calc-key" data-calc="20000">
+                +20k
+              </button>
+              <button type="button" class="calc-key" data-calc="50000">
+                +50k
+              </button>
+              <button type="button" class="calc-key" data-calc="100000">
+                +100k
+              </button>
+              <button type="button" class="calc-key" data-calc="+">+</button>
+              <button type="button" class="calc-key" data-calc="-">-</button>
+              <button type="button" class="calc-key" data-calc="000">
+                000
+              </button>
+              <button type="button" class="calc-key" data-calc="BACK">⌫</button>
+              <button type="button" class="calc-key calc-eval" data-calc="EVAL">
+                =
+              </button>
+            </div>
+          </div>
+
+          <div class="entry-card">
+            <div class="category-picker">
+              <h2>chọn khoản <span id="category-mode-label">chi</span></h2>
+              <div
+                id="category-choices"
+                class="category-choices"
+                role="group"
+                aria-label="Chọn khoản"
+              ></div>
+            </div>
+            <button
+              id="mode-toggle"
+              class="mode-toggle"
+              type="button"
+              aria-label="Đổi chế độ chi/thu"
+            >
+              <strong id="mode-label">chi</strong>
+              <span class="mode-arrows">⇅</span>
+            </button>
+          </div>
+
+          <div class="entry-footer">
+            <section class="entry-progress" aria-label="Tiến độ khoản đã chọn">
+              <div class="progress-label">
+                <span id="entry-progress-name">Chưa chọn khoản</span>
+                <strong id="entry-progress-percent">--</strong>
+              </div>
+              <div
+                id="entry-progress-bar"
+                class="progress-track"
+                role="progressbar"
+                aria-label="Tỉ lệ còn lại"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+              >
+                <div id="entry-progress-fill" class="progress-fill"></div>
+              </div>
+              <p id="entry-progress-amount" class="progress-amount"></p>
+            </section>
+            <label class="sr-only" for="transaction-date">Ngày giao dịch</label>
+            <input id="transaction-date" class="date-input" type="date" />
+            <label class="sr-only" for="transaction-note">Mô tả</label>
+            <input
+              id="transaction-note"
+              class="note-input"
+              type="text"
+              placeholder="mô tả"
+            />
+            <button id="add-transaction" class="submit-button" type="submit">
+              Lưu
+            </button>
+          </div>
+          <p
+            id="transaction-feedback"
+            class="transaction-feedback"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+
+        <aside class="nav-rail" aria-label="Điều hướng">
+          <button
+            class="nav-item"
+            type="button"
+            data-screen="funds"
+            aria-label="Quỹ"
+          >
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M15 47l9-26 15 8 8-14 8 27-19-8-11 13z" />
+              <circle cx="32" cy="13" r="8" />
+              <path d="M25 35l17 8M29 30l17 8" />
+            </svg>
+            <span class="nav-label">Quỹ</span>
+          </button>
+          <button
+            class="nav-item active"
+            type="button"
+            data-screen="entry"
+            aria-label="Home"
+          >
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M10 32l22-20 22 20M16 29v25h32V29" />
+              <path d="M27 54V39h10v15" />
+            </svg>
+            <span class="nav-label">Home</span>
+          </button>
+          <button
+            class="nav-item"
+            type="button"
+            data-screen="overview"
+            aria-label="Lịch sử"
+          >
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M8 54h48M13 54V35h10v19M28 54V23h10v31M43 54V12h10v42" />
+            </svg>
+            <span class="nav-label">Lịch sử</span>
+          </button>
+        </aside>
+      </section>
+    </main>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>

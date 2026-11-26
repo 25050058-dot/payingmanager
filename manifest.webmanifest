@@ -1,0 +1,24 @@
+{
+  "name": "Quản lý tài chính",
+  "short_name": "Tài chính",
+  "description": "Quản lý quỹ và giao dịch tài chính cá nhân trên thiết bị.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#cfd0e1",
+  "theme_color": "#cfd0e1",
+  "icons": [
+    {
+      "src": "./icons/finance-app-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/finance-app-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
